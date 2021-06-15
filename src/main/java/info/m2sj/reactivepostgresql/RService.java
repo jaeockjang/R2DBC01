@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.*;
 
 @Service
@@ -60,5 +61,31 @@ public class RService {
     }
 
 
+
+    @Transactional
+    public Mono<RNumber> saveR122() {
+        RNumber rNumber=new RNumber();
+        rNumber.setName("11-01");
+        rNumber.setRandomNum(0.1F);
+
+        return numberRepository.save(rNumber)
+                .flatMap(x-> {
+                    System.out.println("pid:" + x.getId());
+                    System.out.println("step 1:"+ x);
+                    RNumber2 rNumber2 = new RNumber2();
+                    rNumber2.setName("22-01");
+                    rNumber2.setRandomNum(0.2F);
+                    rNumber2.setPId(x.getId());
+
+                    RNumber2 rNumber2_1 = new RNumber2();
+                    rNumber2_1.setName("22-02");
+                    rNumber2_1.setRandomNum(0.22F);
+                    rNumber2_1.setPId(x.getId());
+
+                    number2Repository.saveAll(Arrays.asList(rNumber2,rNumber2_1)).subscribe();
+
+                    return Mono.justOrEmpty(x);
+                });
+    }
 
 }
