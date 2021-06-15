@@ -82,7 +82,10 @@ public class RService {
                     rNumber2_1.setRandomNum(0.22F);
                     rNumber2_1.setPId(x.getId());
 
-                    number2Repository.saveAll(Arrays.asList(rNumber2,rNumber2_1)).subscribe();
+                     number2Repository.saveAll(Arrays.asList(rNumber2,rNumber2_1))
+                            .subscribe(r2-> {
+                                x.addList(r2);
+                            });
 
                     return Mono.justOrEmpty(x);
                 });
