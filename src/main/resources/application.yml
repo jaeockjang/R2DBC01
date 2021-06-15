@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: testPostgres
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: true
+    ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  r2dbc:
+    url: r2dbc:pool:postgres://localhost:5432/postgres
+    username: test
+    password: test
+    pool:
+      initial-size: 100
+      max-size: 500
+      max-idle-time: 30m
+      validation-query: SELECT 1
+
+logging.level.org.hibernate.type.descriptor.sql: trace
+logging.level.org.springframework.data.r2dbc: DEBUG
