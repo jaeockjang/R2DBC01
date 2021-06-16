@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 
@@ -45,17 +46,16 @@ public class RService {
     }
 
     @Transactional(readOnly = true)
-    public Flux<RNumber> getAllR12(){
-        Flux<RNumber> rNumberFlux= numberRepository.findAll();
-        return rNumberFlux.flatMap(x -> {
-            log.info("pid:"+x.getId());
-            List<RNumber2> listDetail=new ArrayList<>();
+    public Flux<RNumber> getAllR12() {
+
+        return numberRepository.findAll().flatMap(x -> {
+            log.info("pid:" + x.getId());
             return number2Repository.retrieveByPId(x.getId())
-            .collectList().flatMap( list -> {
-                listDetail.addAll(list);
-                x.setList(listDetail);
-                return Mono.justOrEmpty(x);
-            });
+                    .collectList()
+                    .flatMap(list -> {
+                        x.setList(list);
+                        return Mono.justOrEmpty(x);
+                    });
         });
     }
 
