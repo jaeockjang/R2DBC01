@@ -48,6 +48,11 @@ public class RNumberController {
         return rService.saveR12();
     }
 
+    @GetMapping(value = "/1/insert2All", produces = TEXT_EVENT_STREAM_VALUE)
+    public Mono<RNumber> getHome10InsertAll() {
+        return rService.saveR122();
+    }
+
     @GetMapping(value = "/1/insert2/select", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<RNumber> getHome10InsertSelect() {
         return rService.getAllR12();
