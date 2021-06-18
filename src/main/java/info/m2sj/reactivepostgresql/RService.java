@@ -49,13 +49,13 @@ public class RService {
     @Transactional(readOnly = true)
     public Flux<RNumber> getAllR12() {
 
-        return numberRepository.findAll().flatMap(x -> {
-            log.info("pid:" + x.getId());
-            return number2Repository.retrieveByPId(x.getId())
+        return numberRepository.findAll().flatMap(master -> {
+            log.info("pid:" + master.getId());
+            return number2Repository.retrieveByPId(master.getId())
                     .collectList()
                     .flatMap(list -> {
-                        x.setList(list);
-                        return Mono.justOrEmpty(x);
+                        master.setList(list);
+                        return Mono.justOrEmpty(master);
                     });
         });
     }
