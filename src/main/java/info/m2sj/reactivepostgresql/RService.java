@@ -56,11 +56,29 @@ public class RService {
                     .flatMap(list -> {
                         master.setList(list);
                         return Mono.justOrEmpty(master);
-                    });
+                    }).subscribeOn(Schedulers.elastic()) ;
         });
     }
 
+    public List<String> getBlockingData() throws Exception {
+        log.info("Blocking method was executed");
+//        Thread.sleep(10000);
+        List<String> retList = new ArrayList<>();
+        retList.add("abc");
+        log.info("step 3");
+        return retList;
+    }
 
+    public Flux<String> getNonBlockingData() throws Exception {
+        log.info("Blocking method was executed");
+//        Thread.sleep(10000);
+        List<String> retList = new ArrayList<>();
+        for(int i=0; i<10; i++) {
+            retList.add("abc"+i);
+        }
+        log.info("step 3");
+        return Flux.fromIterable(retList).subscribeOn(Schedulers.elastic());
+    }
 
     @Transactional
     public Mono<RNumber> saveR122() {
