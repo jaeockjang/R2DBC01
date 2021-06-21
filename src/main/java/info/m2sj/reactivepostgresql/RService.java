@@ -90,23 +90,33 @@ public class RService {
                 .flatMap(x-> {
                     System.out.println("pid:" + x.getId());
                     System.out.println("step 1:"+ x);
-                    RNumber2 rNumber2 = new RNumber2();
-                    rNumber2.setName("22-01");
-                    rNumber2.setRandomNum(0.2F);
-                    rNumber2.setPId(x.getId());
 
-                    RNumber2 rNumber2_1 = new RNumber2();
-                    rNumber2_1.setName("22-02");
-                    rNumber2_1.setRandomNum(0.22F);
-                    rNumber2_1.setPId(x.getId());
+                    List<RNumber2> r2List= new ArrayList<>();
+                    for(int i=0; i<100; i++) {
+                        RNumber2 rNumber2 = new RNumber2();
+                        rNumber2.setName("22-01"+i);
+                        rNumber2.setRandomNum(0.01F*i);
+                        rNumber2.setPId(x.getId());
+                        r2List.add(rNumber2);
+                        x.addList(rNumber2);
+                    }
+//                    x.setList(r2List);
 
-                     number2Repository.saveAll(Arrays.asList(rNumber2,rNumber2_1))
+//                    RNumber2 rNumber2_1 = new RNumber2();
+//                    rNumber2_1.setName("22-02");
+//                    rNumber2_1.setRandomNum(0.22F);
+//                    rNumber2_1.setPId(x.getId());
+
+                     number2Repository.saveAll(r2List)
+                             .subscribeOn(Schedulers.elastic())
                             .subscribe(r2-> {
                                 x.addList(r2);
-                            });
+                            }) ;
+
 
                     return Mono.justOrEmpty(x);
-                });
+                })
+                ;
     }
 
 }

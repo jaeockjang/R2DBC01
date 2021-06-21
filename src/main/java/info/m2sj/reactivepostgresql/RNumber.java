@@ -29,7 +29,7 @@ public class RNumber {
     @Transient
 //    @OneToMany(mappedBy = "rNumber",fetch = FetchType.LAZY, targetEntity = RNumber2.class)
 //    @ForeignTable(joinkey = "myLink")
-    private List<RNumber2> list;
+    private List<RNumber2> list=new ArrayList<>();
 
     public void addList(RNumber2 r2) {
         if (this.list ==null) this.list=new ArrayList<>();
