@@ -119,4 +119,36 @@ public class RService {
                 ;
     }
 
+
+    @Transactional
+    public Mono<RNumber> saveR123() {
+        RNumber rNumber=new RNumber();
+        rNumber.setName("11-01");
+        rNumber.setRandomNum(0.1F);
+
+        return numberRepository.save(rNumber)
+                .map(x-> {
+                    System.out.println("pid:" + x.getId());
+                    System.out.println("step 1:"+ x);
+
+                    List<RNumber2> r2List= new ArrayList<>();
+                    for(int i=0; i<100; i++) {
+                        RNumber2 rNumber2 = new RNumber2();
+                        rNumber2.setName("22-01"+i);
+                        rNumber2.setRandomNum(0.01F*i);
+                        rNumber2.setPId(x.getId());
+                        r2List.add(rNumber2);
+                        x.addList(rNumber2);
+                    }
+                    return x;
+                })
+                .map(x-> {
+                    x.getList();
+                    number2Repository.saveAll(x.getList()).subscribe();
+                    return x;
+                })
+
+                ;
+    }
+
 }

@@ -1,6 +1,7 @@
 package info.m2sj.reactivepostgresql;
 
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import javax.swing.text.html.Option;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
@@ -31,6 +34,19 @@ public class RNumberController {
     public RNumberController(RNumberRepository numberRepository) {
         this.numberRepository = numberRepository;
     }
+
+    @GetMapping(value = "/3/get", produces = TEXT_EVENT_STREAM_VALUE)
+    public JSONObject getHome3Get() {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("col01", "test01Data");
+        dataMap.put("col02", "test02Data");
+        dataMap.put("col03", "test03Data");
+
+        JSONObject json =  new JSONObject(dataMap);
+        System.out.printf("JSON: %s", json.toJSONString());
+        return json;
+    }
+
 
     @GetMapping(value = "/1", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<RNumber> getHome() {
@@ -53,7 +69,9 @@ public class RNumberController {
 
     @GetMapping(value = "/1/insert2All", produces = TEXT_EVENT_STREAM_VALUE)
     public Mono<RNumber> getHome10InsertAll() {
-        return rService.saveR122();
+
+        return           rService.saveR123();
+
     }
 
     @GetMapping(value = "/1/insert2/select", produces = TEXT_EVENT_STREAM_VALUE)
