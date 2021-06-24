@@ -1,0 +1,129 @@
+@Test
+    public void flux06() {
+        final List<String> basket1 = Arrays.asList(new String[]{"kiwi", "orange", "lemon", "orange", "lemon", "kiwi"});
+        final List<String> basket2 = Arrays.asList(new String[]{"banana", "lemon", "lemon", "kiwi"});
+        final List<String> basket3 = Arrays.asList(new String[]{"strawberry", "orange", "lemon", "grape", "strawberry"});
+        final List<List<String>> baskets = Arrays.asList(basket1, basket2, basket3);
+        final Flux<List<String>> basketFlux = Flux.fromIterable(baskets);
+        System.out.println("started");
+
+        basketFlux.subscribe(x-> x.forEach(y-> {
+            System.out.println(y);
+        }));
+
+        basketFlux
+                .flatMap(x-> Flux.fromIterable(x))
+                .distinct()
+                .subscribe(x-> { System.out.println("distinct:"+x);});
+
+        basketFlux
+                .flatMap(x-> Flux.fromIterable(x))
+                .groupBy(x->x)
+                .log()
+                .concatMap(groupedFlux -> groupedFlux.count()
+                        .map(count -> {
+                            final Map<String, Long> fruitCount = new LinkedHashMap<>();
+                            System.out.println("groupKey:"+ groupedFlux.key() + ",count:"+count);
+                            fruitCount.put(groupedFlux.key(), count);
+                            return fruitCount;
+                        }) // 각 과일별로 개수를 Map으로 리턴
+                ) // concatMap으로 순서보장
+                .reduce((accumulatedMap, currentMap) -> new LinkedHashMap<String, Long>() { {
+                    putAll(accumulatedMap);
+                    putAll(currentMap);
+                }}) // 그동안 누적된 accumulatedMap에 현재 넘어오는 currentMap을 합쳐서 새로운 Map을 만든다. // map끼리 putAll하여 하나의 Map으로 만든다.
+                .subscribe(x-> x.forEach((y,z)->{
+                    System.out.println("y:"+y +", z:"+z);
+                    System.out.println("key2:" + y + ", value:" + x.get(y));
+                } ));
+
+
+//        basketFlux.flatMap(Arrays::stream)
+
+//        basketFlux.flatMap(Arrays::stream)
+//                .groupBy(fruit-> fruit)
+//                .map(x-> {
+//                    Map<String,Object> map = new HashMap<>();
+//                    System.out.println("count:"+x.count());
+//                    map.put (x.key(),x.count());
+//                    return map;
+//                }
+//        )
+//                .subscribe((x)-> {
+//            System.out.println("key0:"+ x);
+//        });
+
+        basketFlux.concatMap(basket -> {
+            final Mono<List<String>> distinctFruits = Flux.fromIterable(basket).distinct().collectList();
+            final Mono<Map<String, Long>> countFruitsMono = Flux.fromIterable(basket)
+                    .log()
+                    .groupBy(fruit -> fruit) // 바구니로 부터 넘어온 과일 기준으로 group을 묶는다.
+                    .map(x-> {
+                        System.out.println("key1:"+x.key());
+                        return x;
+                    })
+                    .log()
+                    .concatMap(groupedFlux -> groupedFlux.count()
+                            .map(count -> {
+                                final Map<String, Long> fruitCount = new LinkedHashMap<>();
+                                System.out.println("groupKey:"+ groupedFlux.key());
+                                fruitCount.put(groupedFlux.key(), count);
+                                return fruitCount;
+                            }) // 각 과일별로 개수를 Map으로 리턴
+                    ) // concatMap으로 순서보장
+                    .log()
+                    .reduce((accumulatedMap, currentMap) -> new LinkedHashMap<String, Long>() { {
+                        putAll(accumulatedMap);
+                        putAll(currentMap);
+                    }}); // 그동안 누적된 accumulatedMap에 현재 넘어오는 currentMap을 합쳐서 새로운 Map을 만든다. // map끼리 putAll하여 하나의 Map으로 만든다.
+
+            countFruitsMono.subscribe(x-> {
+                x.forEach((y,z)->{
+                    System.out.println("key:"+y);
+                    System.out.println("value:"+z);
+                });
+            } );
+
+            return null;
+        });
+
+        try {
+            Thread.sleep(5000);
+        }catch (Exception e) {
+
+        }
+
+    }
+
+    @Test
+    public void two() {
+        List<String> array = new ArrayList<String>();
+        array.addAll(Arrays.asList(new String[]{"a", "b", "c", "d", "e", "e"}));
+
+        Flux.fromIterable(array)
+                .groupBy(arr -> arr)
+                .flatMap(arg -> {  //첫번째 map, arg는 GroupedFlux
+                    Mono<Map<Object, Object>> mono =
+                            arg.count().map(count -> { //두번째 map, arg.count()는 Mono<Long>
+                                Map<Object, Object> item = new HashMap<>();
+                                item.put(arg.key(), count);
+                                return item;
+                            });
+                    return mono;
+                })
+                .log()
+
+                .reduce((acc, curr) -> new HashMap<Object, Object>() {{
+                    putAll(acc);
+                    putAll(curr);
+                    System.out.println("acc:"+acc);
+                    System.out.println("curr:"+curr);
+                }})
+                .subscribe((data) -> {
+                    System.out.println(data);
+                    data.keySet().forEach(key -> {
+                                System.out.println("key:" + key + ",value:" + data.get(key));
+                            }
+                    );
+                });
+    }

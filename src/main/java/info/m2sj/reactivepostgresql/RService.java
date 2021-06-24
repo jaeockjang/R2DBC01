@@ -56,7 +56,7 @@ public class RService {
                     .flatMap(list -> {
                         master.setList(list);
                         return Mono.justOrEmpty(master);
-                    }).subscribeOn(Schedulers.elastic()) ;
+                    }).subscribeOn(Schedulers.boundedElastic()) ;
         });
     }
 
@@ -120,8 +120,7 @@ public class RService {
     }
 
 
-    @Transactional
-    public Mono<RNumber> saveR123() {
+    private Mono<RNumber> saveR123() {
         RNumber rNumber=new RNumber();
         rNumber.setName("11-01");
         rNumber.setRandomNum(0.1F);
@@ -147,8 +146,21 @@ public class RService {
                     number2Repository.saveAll(x.getList()).subscribe();
                     return x;
                 })
-
                 ;
+    }
+
+    private Mono<Void> errorOccur() throws Exception {
+        throw new RuntimeException("error!!!!");
+    }
+
+    @Transactional
+    public Mono<RNumber> facadeSave() throws Exception{
+
+        Mono<RNumber>  rNumberMono= this.saveR123();
+        errorOccur();
+
+        return rNumberMono;
+
     }
 
 }

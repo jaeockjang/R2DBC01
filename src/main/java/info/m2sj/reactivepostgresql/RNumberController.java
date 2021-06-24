@@ -68,9 +68,10 @@ public class RNumberController {
     }
 
     @GetMapping(value = "/1/insert2All", produces = TEXT_EVENT_STREAM_VALUE)
-    public Mono<RNumber> getHome10InsertAll() {
+    public Mono<RNumber> getHome10InsertAll() throws Exception{
 
-        return           rService.saveR123();
+//        Mono<RNumber> rNumberMono=rService.saveR123();
+        return rService.facadeSave();
 
     }
 
