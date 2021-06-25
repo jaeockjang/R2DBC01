@@ -127,3 +127,23 @@
                     );
                 });
     }
+
+
+    @GetMapping(value = "/stream4",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Long> getAllCustomersStream4() {
+        return Flux.range(1,1000)
+                .delayElements(Duration.ofSeconds(1))
+                .doOnNext(i -> System.out.println("processing count in stream flow : " + i))
+                .map(i -> new Customer(i, "customer" + i))
+                .window(Duration.ofSeconds(10))
+                .log()
+                .flatMap(x-> x.collect(Collectors.toList()) )
+                .map(x -> {
+                            Long[] a={0L};
+                            x.forEach(y-> {
+                                a[0]= a[0]+ y.getId();
+                            });
+                            return a[0];
+                        }
+                );
+    }
